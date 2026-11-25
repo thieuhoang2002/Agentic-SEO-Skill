@@ -19,6 +19,7 @@ Usage:
 import argparse
 import json
 import os
+import re
 import sys
 from datetime import datetime, timedelta
 
@@ -58,6 +59,20 @@ PRESET_REGEXES = {
     "long-tail-questions": r"^(?:\S+\s+){7,}\S+$",
     "how-what-why": r"(?i)\b(how|what|why)\b",
 }
+_CONTROL_CHARS_RE = re.compile(r"[\x00-\x1f\x7f]")
+
+
+def _sanitize_gsc_text(value: str) -> str:
+    return _CONTROL_CHARS_RE.sub(" ", str(value or "")).strip()
+
+
+def resolve_query_params(days: int = 28, months: int = 0, row_limit: int = 50) -> tuple[int, int]:
+    """Clamp lookback days (1..480) and row_limit (1..25000)."""
+    clamped_months = max(0, min(months, 16))
+    raw_days = clamped_months * 30 if clamped_months > 0 else days
+    lookback_days = max(1, min(raw_days, 480))
+    clamped_limit = max(1, min(row_limit, 25000))
+    return lookback_days, clamped_limit
 
 
 def get_performance_data(
@@ -107,8 +122,8 @@ def get_performance_data(
             "total_rows": len(rows),
             "data": [
                 {
-                    "query": r["keys"][0],
-                    "page": r["keys"][1],
+                    "query": _sanitize_gsc_text(r["keys"][0]),
+                    "page": _sanitize_gsc_text(r["keys"][1]),
                     "clicks": r.get("clicks", 0),
                     "impressions": r.get("impressions", 0),
                     "ctr": round(r.get("ctr", 0) * 100, 2),
@@ -292,7 +307,7 @@ def main():
         parser.error("GSC credentials required. Pass --credentials <path> or set GSC_CREDENTIALS_PATH in your environment / .env file.")
     service = build_service(credentials_path)
 
-    lookback_days = min(args.months * 30, 480) if args.months > 0 else args.days
+    lookback_days, row_limit = resolve_query_params(args.days, args.months, args.row_limit)
     query_regex = args.regex or PRESET_REGEXES.get(args.preset, "")
 
     report = {
@@ -307,7 +322,7 @@ def main():
         args.site_url,
         days=lookback_days,
         query_filter=args.query,
-        row_limit=args.row_limit,
+        row_limit=row_limit,
         query_regex=query_regex,
     )
     report["performance"] = perf

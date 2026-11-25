@@ -1,6 +1,6 @@
 # Script Inventory
 
-The README shows only the most-used scripts. This wiki page is the full script inventory for Agentic SEO Skill `v3.0.0`, with purpose notes kept in one place for maintainers and users who need deeper coverage.
+The README shows only the most-used scripts. This wiki page is the full script inventory for Agentic SEO Skill `v3.1.0-fork`, with purpose notes kept in one place for maintainers and users who need deeper coverage.
 
 The skill ships 91 runtime scripts. The authoritative inventory check is:
 
@@ -86,7 +86,7 @@ OK: documented inventory matches files on disk.
 | `lighthouse_runner.py` | Run local Lighthouse when available and return structured performance, SEO, accessibility, and best-practice scores. |
 | `link_profile.py` | Build internal/external link profile evidence and optional GSC link data. |
 | `llms_txt_checker.py` | Check `/llms.txt` availability and format for AI search readiness. |
-| `llms_txt_generator.py` | Generate a clean `/llms.txt` draft from a site title, description, and priority URLs. |
+| `llms_txt_generator.py` | Generate a clean `/llms.txt` (and optional `--full` `/llms-full.txt`) draft from a site title, description, and priority URLs. |
 | `local_seo_checker.py` | Check NAP, LocalBusiness schema, service area, reviews, map/embed, and GBP-style local signals. |
 | `log_file_analyzer.py` | Analyze server logs for crawler hits, status patterns, wasted crawl, and crawl-budget signals. |
 | `mobile_render_checker.py` | Check mobile viewport, fixed-width, sticky element, horizontal-scroll, tap-target, and clipped-text risks. |

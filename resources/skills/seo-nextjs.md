@@ -62,8 +62,8 @@ Unify core entities inside a top-level `@graph` rather than nesting `Person` ins
 
 ### 4. `app/robots.ts` & Index Hygiene
 - Explicitly allow/manage search and AI search crawlers (`Googlebot`, `Bingbot`, `Applebot`, `GPTBot`, `OAI-SearchBot`, `ChatGPT-User`, `ClaudeBot`, `PerplexityBot`, `Google-Extended`).
-- **Disallow internal/sensitive routes** discovered in `app/`: `/api/`, admin/CMS paths (`/admin`, `/cms`, `/dashboard`, `/vault`, etc.), and affiliate redirect paths (`/go/`).
-- Pair with `robots: { index: false, follow: false }` on admin/auth layouts or `X-Robots-Tag: noindex, nofollow` headers on redirect/API endpoints.
+- **Disallow non-secret technical/redirect prefixes** in `app/robots.ts`: `/api/` and affiliate redirect prefixes such as `/go/`.
+- **Do NOT disclose obscured/secret CMS or admin URLs in public `robots.ts`** (OWASP WSTG-INFO-03). Instead, protect admin/CMS layouts with `export const metadata = { robots: { index: false, follow: false } }`, `X-Robots-Tag: noindex, nofollow`, and authentication gates.
 
 ### 5. Dynamic `app/sitemap.ts`
 - Query published records dynamically from your database/CMS (MongoDB, Prisma, Sanity, MDX) with fallback data if DB is unreachable at build time.

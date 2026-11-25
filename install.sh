@@ -282,6 +282,8 @@ Activate whenever the user asks to:
 | `seo hreflang <url>`    | International       | hreflang validation                        |
 | `seo github <repo>`     | GitHub SEO          | Repo metadata, README, community, traffic  |
 | `seo plan <topic>`      | Strategic plan      | Topical clusters, industry templates       |
+| `seo nextjs <dir>`      | Next.js App Router  | Code-level SSR, metadata, robots, llms.txt |
+| `seo growth <url>`      | Growth & GEO        | Free backlinks, GSC 16m, Reddit, GTM spy   |
 
 ## Workflow
 
@@ -366,7 +368,7 @@ Use the full SEO workflow:
 1. Identify the audit target (URL, page, article, or GitHub repo) from the user's request.
 2. Collect evidence first (`read_url_content`, then bundled scripts as needed).
 3. Run the appropriate sub-skill (audit / page / article / technical / content / schema /
-   sitemap / images / geo / aeo / links / hreflang / github / plan).
+   sitemap / images / geo / aeo / links / hreflang / github / plan / nextjs / growth).
 4. Apply the llm-audit-rubric: evidence -> impact -> fix, with confidence labels.
 5. Produce FULL-AUDIT-REPORT.md and ACTION-PLAN.md with prioritised fixes.
 

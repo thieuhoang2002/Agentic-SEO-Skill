@@ -19,44 +19,64 @@ import json
 import re
 import sys
 from pathlib import Path
+from urllib.parse import quote
 
 from seo_common import fetch_url, normalize_url
 
 
 GTM_ID_RE = re.compile(r"\bGTM-[A-Z0-9]{4,10}\b")
+GTM_ID_FULL_RE = re.compile(r"^GTM-[A-Z0-9]{4,10}$")
 GA4_ID_RE = re.compile(r"\bG-[A-Z0-9]{6,12}\b")
 AW_ID_RE = re.compile(r"\bAW-[0-9]{6,12}\b")
 META_PIXEL_RE = re.compile(r"fbq\(\s*['\"]init['\"]\s*,\s*['\"](\d{10,20})['\"]")
 AWCT_BLOCK_RE = re.compile(r"__awct.{0,450}", flags=re.DOTALL)
-CONVERSION_LABEL_RE = re.compile(r"""vtp_conversionLabel["']?\s*[:=]\s*["']([^"']+)["']""")
-CONVERSION_ID_RE = re.compile(r"""vtp_conversionId["']?\s*[:=]\s*["']([^"']+)["']""")
-EVENT_NAME_RE = re.compile(r"""(?:vtp_eventName|event["']?\s*[:=])\s*["']([a-zA-Z0-9_.\- ]{2,60})["']""")
+CONVERSION_LABEL_RE = re.compile(r"""vtp_conversionLabel["']?\s*[:=]\s*["']([A-Za-z0-9_\-=+/]{1,64})["']""")
+CONVERSION_ID_RE = re.compile(r"""vtp_conversionId["']?\s*[:=]\s*["']([A-Za-z0-9_\-]{1,64})["']""")
+EVENT_NAME_RE = re.compile(r"""(?:vtp_eventName|event)["']?\s*[:=]\s*["']([a-zA-Z0-9_.\- ]{2,60})["']""")
+ANSI_ESCAPE_RE = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
+CONTROL_CHARS_RE = re.compile(r"[\x00-\x1f\x7f]")
+
+
+def _clean_token(value: str | None) -> str | None:
+    if not value:
+        return None
+    cleaned = ANSI_ESCAPE_RE.sub("", value)
+    cleaned = CONTROL_CHARS_RE.sub("", cleaned).strip()
+    return cleaned or None
+
+
+def validate_gtm_id(raw_id: str) -> str:
+    """Validate and normalize a GTM container ID (`GTM-XXXXXX`)."""
+    candidate = (raw_id or "").strip().upper()
+    if not GTM_ID_FULL_RE.fullmatch(candidate):
+        raise ValueError(f"Invalid GTM container ID: {raw_id!r}. Expected format GTM-XXXXXX.")
+    return candidate
 
 
 def extract_gtm_signals_from_js(gtm_js: str, gtm_id: str) -> dict:
     """Parse Google Ads (__awct), GA4, and event names from raw gtm.js payload."""
     awct_matches = AWCT_BLOCK_RE.findall(gtm_js)
     conversions: list[dict] = []
-    seen: set[tuple[str, str]] = set()
+    seen: set[tuple[str | None, str | None]] = set()
 
     for block in awct_matches:
         cid_match = CONVERSION_ID_RE.search(block)
         label_match = CONVERSION_LABEL_RE.search(block)
-        cid = cid_match.group(1) if cid_match else ""
-        label = label_match.group(1) if label_match else ""
+        cid = _clean_token(cid_match.group(1)) if cid_match else None
+        label = _clean_token(label_match.group(1)) if label_match else None
         key = (cid, label)
         if key not in seen and (cid or label):
             seen.add(key)
             conversions.append({
-                "conversion_id": cid or None,
-                "conversion_label": label or None,
-                "snippet": block[:180].replace("\n", " "),
+                "conversion_id": cid,
+                "conversion_label": label,
             })
 
     events = sorted({
-        m.group(1).strip()
+        cleaned
         for m in EVENT_NAME_RE.finditer(gtm_js)
-        if not m.group(1).startswith("gtm.")
+        for cleaned in [_clean_token(m.group(1))]
+        if cleaned and not cleaned.startswith("gtm.")
     })
 
     return {
@@ -72,7 +92,14 @@ def extract_gtm_signals_from_js(gtm_js: str, gtm_id: str) -> dict:
 
 def inspect_target(source: str, explicit_gtm_ids: list[str] | None = None, fetch_gtm: bool = True, timeout: int = 15) -> dict:
     """Inspect a URL or local HTML file for GTM containers and conversion tags."""
-    gtm_ids: set[str] = set(explicit_gtm_ids or [])
+    gtm_ids: set[str] = set()
+    invalid_gtm_ids: list[str] = []
+    for raw_id in explicit_gtm_ids or []:
+        try:
+            gtm_ids.add(validate_gtm_id(raw_id))
+        except ValueError:
+            invalid_gtm_ids.append(raw_id)
+
     resolved_source = source
     fetch_error = None
 
@@ -93,27 +120,33 @@ def inspect_target(source: str, explicit_gtm_ids: list[str] | None = None, fetch
         if not fetch_gtm:
             containers.append({"gtm_id": gtm_id, "fetched": False})
             continue
-        gtm_url = f"https://www.googletagmanager.com/gtm.js?id={gtm_id}"
+        gtm_url = f"https://www.googletagmanager.com/gtm.js?id={quote(gtm_id, safe='')}"
         gtm_resp = fetch_url(gtm_url, timeout=timeout, max_bytes=3_000_000)
-        if gtm_resp.get("text"):
+        status = gtm_resp.get("status")
+        if status == 200 and gtm_resp.get("text"):
             parsed = extract_gtm_signals_from_js(gtm_resp["text"], gtm_id)
             parsed["fetched"] = True
+            parsed["status"] = status
             parsed["gtm_url"] = gtm_url
             containers.append(parsed)
         else:
             containers.append({
                 "gtm_id": gtm_id,
                 "fetched": False,
+                "status": status,
                 "gtm_url": gtm_url,
-                "error": gtm_resp.get("error") or f"HTTP {gtm_resp.get('status')}",
+                "error": gtm_resp.get("error") or f"HTTP {status}",
             })
 
-    return {
+    result: dict = {
         "source": resolved_source or None,
         "fetch_error": fetch_error,
         "gtm_ids": sorted(gtm_ids),
         "containers": containers,
     }
+    if invalid_gtm_ids:
+        result["invalid_gtm_ids"] = invalid_gtm_ids
+    return result
 
 
 def main() -> int:
@@ -145,6 +178,8 @@ def main() -> int:
     print("=" * 60)
     if result["fetch_error"]:
         print(f"Fetch warning: {result['fetch_error']}")
+    if result.get("invalid_gtm_ids"):
+        print(f"Ignored invalid GTM ID(s): {', '.join(result['invalid_gtm_ids'])}")
     print(f"GTM Containers: {', '.join(result['gtm_ids']) or 'None found'}")
     for container in result["containers"]:
         print(f"\n[{container['gtm_id']}]")
