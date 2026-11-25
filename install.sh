@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-REPO_URL="${REPO_URL:-https://github.com/Bhanunamikaze/Agentic-SEO-Skill.git}"
-GITHUB_REPO="${GITHUB_REPO:-Bhanunamikaze/Agentic-SEO-Skill}"
+REPO_URL="${REPO_URL:-https://github.com/thieuhoang2002/Agentic-SEO-Skill.git}"
+GITHUB_REPO="${GITHUB_REPO:-thieuhoang2002/Agentic-SEO-Skill}"
 GITHUB_REF="${GITHUB_REF:-main}"
 SKILL_NAME="seo"
 TARGET="claude"
@@ -84,7 +84,7 @@ Examples:
   bash install.sh --online --ref develop
 
 Safer remote install:
-  curl -fsSLO https://raw.githubusercontent.com/Bhanunamikaze/Agentic-SEO-Skill/main/install.sh
+  curl -fsSLO https://raw.githubusercontent.com/thieuhoang2002/Agentic-SEO-Skill/main/install.sh
   bash install.sh --target claude
 EOF
 }
@@ -250,7 +250,7 @@ _skill_invocation_text() {
     cat <<'SKILL_CONTENT'
 # Agentic SEO Skill
 
-You have access to the Agentic SEO analysis skill (16 sub-skills, 10 specialist agents, 89 scripts).
+You have access to the Agentic SEO analysis skill (18 sub-skills, 10 specialist agents, 91 scripts).
 
 ## When to activate
 

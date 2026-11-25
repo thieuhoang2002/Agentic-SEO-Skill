@@ -1,8 +1,8 @@
 # SEO Skill (Antigravity / Claude / Codex / Cursor)
 
-An LLM-first SEO analysis skill for agent IDEs and AI coding assistants, with 16 specialized sub-skills, 10 specialist agents, and 89 scripts used as evidence collectors and workflow automation.
+An LLM-first SEO analysis skill for agent IDEs and AI coding assistants, with 18 specialized sub-skills, 10 specialist agents, and 91 scripts used as evidence collectors and workflow automation.
 
-For detailed installation guidance, example prompts, report generation, troubleshooting, and the full script inventory, see the **[Agentic SEO Skill Wiki](https://github.com/Bhanunamikaze/Agentic-SEO-Skill/wiki)**.
+For detailed installation guidance, example prompts, report generation, troubleshooting, and the full script inventory, see the **[Agentic SEO Skill Wiki](https://github.com/thieuhoang2002/Agentic-SEO-Skill/wiki)**.
 
 ## IDE Compatibility
 
@@ -22,9 +22,9 @@ The installer ships native formats for each tool — not just a generic copy:
 
 ## 📦 Current Inventory
 
-- Specialized sub-skills: `16`
+- Specialized sub-skills: `18`
 - Specialist agents: `10`
-- Scripts in `scripts/`: `89` (`88` Python + `1` shell validation helper)
+- Scripts in `scripts/`: `91` (`90` Python + `1` shell validation helper)
 
 Inventory drift is checked by CI with:
 
@@ -35,7 +35,7 @@ python3 scripts/reference_freshness.py resources/references --max-age-days 90
 
 ### Key Script Inventory
 
-The README only highlights the scripts most users reach for first. See the full 89-script list with purpose notes in the [Script Inventory wiki](https://github.com/Bhanunamikaze/Agentic-SEO-Skill/wiki/Script-Inventory).
+The README only highlights the scripts most users reach for first. See the full 91-script list with purpose notes in the [Script Inventory wiki](https://github.com/thieuhoang2002/Agentic-SEO-Skill/wiki/Script-Inventory).
 
 | Script | Best for |
 |---|---|
@@ -51,6 +51,8 @@ The README only highlights the scripts most users reach for first. See the full 
 | `image_inventory.py` | Image alt text, dimensions, loading behavior, responsive image, and LCP-candidate evidence. |
 | `validate_schema.py` | JSON-LD syntax, required fields, placeholders, and deprecated schema checks. |
 | `github_seo_report.py` | GitHub repository SEO report and action plan generation. |
+| `nextjs_seo_audit.py` | Code-level Next.js App Router SEO & GEO auditor (`'use client'`, metadata, `robots.ts`, `llms-full.txt`, affiliate rel). |
+| `gtm_funnel_spy.py` | Inspect competitor `GTM-XXXXXX` containers for Google Ads (`__awct`) and GA4 funnel events. |
 | `finding_verifier.py` | Deduplicate, prioritize, and validate findings before final reporting. |
 
 ## 🐙 GitHub SEO Metadata
@@ -58,7 +60,7 @@ The README only highlights the scripts most users reach for first. See the full 
 Recommended GitHub repository description (About field):
 
 ```text
-LLM-first SEO skill for Claude Code, Codex, Antigravity, Cursor, Windsurf, Continue, Copilot, and Cline — 16 sub-skills, 10 specialist agents, and GitHub SEO workflows that output GITHUB-SEO-REPORT.md and GITHUB-ACTION-PLAN.md.
+LLM-first SEO & GEO skill for Claude Code, Codex, Antigravity, Cursor, Windsurf, Continue, Copilot, and Cline — 18 sub-skills, 10 specialist agents, Next.js App Router code audit, Off-page Growth GEO, and GitHub SEO workflows.
 ```
 
 Suggested GitHub topics:
@@ -88,6 +90,8 @@ seo, llm, github-seo, ai-search, geo, aeo, technical-seo, schema, core-web-vital
 | [seo hreflang](resources/skills/seo-hreflang.md) | International SEO / hreflang validation |
 | [seo plan](resources/skills/seo-plan.md) | Strategic SEO planning with topical clusters & industry templates |
 | [seo github](resources/skills/seo-github.md) | GitHub repository SEO: metadata/topics, README quality, community profile, query benchmarking, traffic archiving |
+| [seo nextjs](resources/skills/seo-nextjs.md) | Code-level Next.js App Router SEO & GEO audit (`'use client'`, metadata, `robots.ts`, `llms.txt` / `llms-full.txt`, `@graph`) |
+| [seo growth-geo](resources/skills/seo-growth-geo.md) | Off-page GEO, zero-to-one backlinks, GSC 16-month regex mining, Reddit anti-ban playbook, & GTM funnel spy |
 
 ## 🧠 LLM-First Workflow
 
@@ -149,22 +153,22 @@ All `--online` commands below download the latest release package from GitHub au
 **Linux / macOS:**
 ```bash
 # Default: installs to every target at once
-curl -fsSL https://raw.githubusercontent.com/Bhanunamikaze/Agentic-SEO-Skill/main/install.sh | bash -s -- --online
+curl -fsSL https://raw.githubusercontent.com/thieuhoang2002/Agentic-SEO-Skill/main/install.sh | bash -s -- --online
 
 # Claude Code only
-curl -fsSL https://raw.githubusercontent.com/Bhanunamikaze/Agentic-SEO-Skill/main/install.sh | bash -s -- --online --target claude
+curl -fsSL https://raw.githubusercontent.com/thieuhoang2002/Agentic-SEO-Skill/main/install.sh | bash -s -- --online --target claude
 
 # User-wide (Claude + Codex)
-curl -fsSL https://raw.githubusercontent.com/Bhanunamikaze/Agentic-SEO-Skill/main/install.sh | bash -s -- --online --target global
+curl -fsSL https://raw.githubusercontent.com/thieuhoang2002/Agentic-SEO-Skill/main/install.sh | bash -s -- --online --target global
 
 # Every target, scoped to a project
-curl -fsSL https://raw.githubusercontent.com/Bhanunamikaze/Agentic-SEO-Skill/main/install.sh | bash -s -- --online --target all --project-dir /path/to/your/project
+curl -fsSL https://raw.githubusercontent.com/thieuhoang2002/Agentic-SEO-Skill/main/install.sh | bash -s -- --online --target all --project-dir /path/to/your/project
 ```
 
 **Windows (PowerShell 7+):**
 ```powershell
 # Download installer, then run with --online
-irm https://raw.githubusercontent.com/Bhanunamikaze/Agentic-SEO-Skill/main/install.ps1 -OutFile install.ps1
+irm https://raw.githubusercontent.com/thieuhoang2002/Agentic-SEO-Skill/main/install.ps1 -OutFile install.ps1
 
 # Default: installs to every target at once
 powershell -ExecutionPolicy Bypass -File .\install.ps1 --online
@@ -179,7 +183,7 @@ powershell -ExecutionPolicy Bypass -File .\install.ps1 --online --target all --p
 ### From source
 
 ```bash
-git clone https://github.com/Bhanunamikaze/Agentic-SEO-Skill.git
+git clone https://github.com/thieuhoang2002/Agentic-SEO-Skill.git
 cd Agentic-SEO-Skill
 
 # Claude Code (most common)
@@ -231,7 +235,7 @@ powershell -ExecutionPolicy Bypass -File .\install.ps1 --target all --project-di
 
 **Safer remote install (download, inspect, run):**
 ```bash
-curl -fsSLO https://raw.githubusercontent.com/Bhanunamikaze/Agentic-SEO-Skill/main/install.sh
+curl -fsSLO https://raw.githubusercontent.com/thieuhoang2002/Agentic-SEO-Skill/main/install.sh
 less install.sh                  # review before running
 bash install.sh --online
 ```
@@ -608,9 +612,9 @@ python3 scripts/generate_report.py "$URL"
 
 ## 🙏 Credits
 
-This project was originally inspired by **[claude-seo](https://github.com/AgriciDaniel/claude-seo)** by **[AgriciDaniel](https://github.com/AgriciDaniel)**.
+This fork extends **[Agentic-SEO-Skill](https://github.com/Bhanunamikaze/Agentic-SEO-Skill)** by **[Bhanunamikaze](https://github.com/Bhanunamikaze)**, which was originally inspired by **[claude-seo](https://github.com/AgriciDaniel/claude-seo)** by **[AgriciDaniel](https://github.com/AgriciDaniel)**.
 
-Agentic SEO Skill has since evolved into a broader, independently maintained skill package with expanded agent workflows, release packaging, GitHub SEO automation, reporting, validation, and many additional scripts. The project keeps the same practical goal: make SEO analysis usable inside agent IDEs and AI coding assistants through a clear skill layout (`SKILL.md` + `scripts/` + `resources/`).
+This edition adds code-level Next.js App Router SEO/GEO auditing (`seo-nextjs`, `nextjs_seo_audit.py`), `/llms-full.txt` generation, 16-month GSC regex query mining (`gsc_checker.py`), GTM competitor funnel inspection (`gtm_funnel_spy.py`), and an Off-page Growth & GEO playbook (`seo-growth-geo`).
 
 ---
 

@@ -2,6 +2,20 @@
 
 All notable changes to this project should be documented here.
 
+## v3.1.0-fork - 2026-11-25
+
+### Added
+
+- `seo-nextjs` sub-skill and `scripts/nextjs_seo_audit.py` for code-level Next.js App Router SEO & GEO audits (`'use client'` SSR checks, `metadataBase`, `generateMetadata`, `robots.ts` sensitive/affiliate route checks, `/llms.txt` + `/llms-full.txt`, JSON-LD `@graph`, security headers, affiliate `rel="sponsored"`).
+- `seo-growth-geo` sub-skill and `resources/references/growth-geo-playbook.md` covering zero-to-one high-DR backlinks, 16-month GSC query mining, borrowed authority, Reddit anti-ban SOP, and off-page AI citation hunting.
+- `scripts/gtm_funnel_spy.py` to inspect competitor `GTM-XXXXXX` containers for Google Ads (`__awct`) conversion tags and GA4 funnel events.
+
+### Changed
+
+- Upgraded `scripts/gsc_checker.py` with `--months` (up to 16 months / 480 days), `--regex`, `--preset` (`long-tail-questions`, `how-what-why`), and `page_one_threshold` (positions 8–15) detection.
+- Upgraded `scripts/llms_txt_generator.py` with `--full` mode to generate consolidated `llms-full.txt` content alongside `llms.txt`.
+- Updated installer defaults (`install.ps1`, `install.sh`), `README.md`, `SKILL.md`, and `wiki/Script-Inventory.md` to reflect 18 sub-skills and 91 scripts.
+
 ## v3.0.1 - 2026-05-15
 
 ### Changed

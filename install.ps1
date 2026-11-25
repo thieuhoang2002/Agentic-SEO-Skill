@@ -2,8 +2,8 @@
 
 $ErrorActionPreference = 'Stop'
 
-$REPO_URL        = if ($env:REPO_URL) { $env:REPO_URL } else { 'https://github.com/Bhanunamikaze/Agentic-SEO-Skill.git' }
-$GITHUB_REPO     = if ($env:GITHUB_REPO) { $env:GITHUB_REPO } else { 'Bhanunamikaze/Agentic-SEO-Skill' }
+$REPO_URL        = if ($env:REPO_URL) { $env:REPO_URL } else { 'https://github.com/thieuhoang2002/Agentic-SEO-Skill.git' }
+$GITHUB_REPO     = if ($env:GITHUB_REPO) { $env:GITHUB_REPO } else { 'thieuhoang2002/Agentic-SEO-Skill' }
 $GITHUB_REF      = if ($env:GITHUB_REF)  { $env:GITHUB_REF }  else { 'main' }
 $SKILL_NAME      = 'seo'
 $TARGET          = 'claude'
@@ -26,7 +26,7 @@ $REQUIRED_PATHS  = @('SKILL.md', 'scripts', 'resources')
 $SKILL_INVOCATION_TEXT = @'
 # Agentic SEO Skill
 
-You have access to the Agentic SEO analysis skill (16 sub-skills, 10 specialist agents, 89 scripts).
+You have access to the Agentic SEO analysis skill (18 sub-skills, 10 specialist agents, 91 scripts).
 
 ## When to activate
 

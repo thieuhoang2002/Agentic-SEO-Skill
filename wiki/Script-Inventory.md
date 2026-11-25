@@ -2,7 +2,7 @@
 
 The README shows only the most-used scripts. This wiki page is the full script inventory for Agentic SEO Skill `v3.0.0`, with purpose notes kept in one place for maintainers and users who need deeper coverage.
 
-The skill ships 89 runtime scripts. The authoritative inventory check is:
+The skill ships 91 runtime scripts. The authoritative inventory check is:
 
 ```bash
 python3 scripts/validate_skill_inventory.py
@@ -11,7 +11,7 @@ python3 scripts/validate_skill_inventory.py
 Expected result:
 
 ```text
-Inventory: 16 skills, 10 agents, 89 scripts (88 Python + 1 shell)
+Inventory: 18 skills, 10 agents, 91 scripts (90 Python + 1 shell)
 OK: documented inventory matches files on disk.
 ```
 
@@ -72,7 +72,8 @@ OK: documented inventory matches files on disk.
 | `github_seo_report.py` | Combine repository SEO checks into markdown report and action-plan artifacts. |
 | `github_traffic_archiver.py` | Archive GitHub traffic snapshots before the 14-day window expires. |
 | `github_weekly_scorecard.py` | Build weekly GitHub SEO score snapshots from repository, release, docs, and traffic artifacts. |
-| `gsc_checker.py` | Pull Search Console performance, crawl, and sitemap data with credentials. |
+| `gsc_checker.py` | Pull Search Console performance, 16-month regex queries (`8+ words`, `how/what/why`), crawl, and sitemap data with credentials. |
+| `gtm_funnel_spy.py` | Inspect competitor `GTM-XXXXXX` containers for Google Ads (`__awct`) conversion tracking and GA4 funnel events. |
 | `hreflang_checker.py` | Validate hreflang implementation, return tags, x-default, and sitemap signals. |
 | `hreflang_sitemap_validator.py` | Validate hreflang annotations across sitemap indexes and XML sitemap alternates. |
 | `image_inventory.py` | Inventory images for alt text, dimensions, lazy/eager loading, srcset, sizes, and potential LCP candidates. |
@@ -89,6 +90,7 @@ OK: documented inventory matches files on disk.
 | `local_seo_checker.py` | Check NAP, LocalBusiness schema, service area, reviews, map/embed, and GBP-style local signals. |
 | `log_file_analyzer.py` | Analyze server logs for crawler hits, status patterns, wasted crawl, and crawl-budget signals. |
 | `mobile_render_checker.py` | Check mobile viewport, fixed-width, sticky element, horizontal-scroll, tap-target, and clipped-text risks. |
+| `nextjs_seo_audit.py` | Code-level Next.js App Router SEO & GEO auditor (`'use client'`, metadata, `robots.ts`, `llms.txt` / `llms-full.txt`, security headers, affiliate rel). |
 | `orphan_pages_from_sitemap.py` | Compare crawl-discovered URLs against sitemap URLs to identify orphan candidates. |
 | `pagespeed.py` | Fetch Core Web Vitals and performance data from PageSpeed Insights. |
 | `parse_html.py` | Extract SEO-relevant HTML elements from a fetched or local page. |

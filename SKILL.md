@@ -11,7 +11,7 @@ description: >
 
 # SEO Skill (Agentic / Claude / Codex)
 
-LLM-first SEO analysis skill with 16 specialized sub-skills, 10 specialist agents, and 89 scripts for website, blog, and GitHub repository optimization.
+LLM-first SEO analysis skill with 18 specialized sub-skills, 10 specialist agents, and 91 scripts for website, blog, Next.js App Router, and GitHub repository optimization.
 
 ## Deterministic Trigger Mapping
 
@@ -44,6 +44,8 @@ For prompt reliability in Codex/agent IDEs, map common user wording to a fixed w
 | `seo article <url>` | [seo-article](resources/skills/seo-article.md) | Article data extraction & LLM optimization |
 | `seo links <url>` | [seo-links](resources/skills/seo-links.md) | External backlink profile & link health |
 | `seo aeo <url>` | [seo-aeo](resources/skills/seo-aeo.md) | Answer Engine Optimization (Featured Snippets, PAA, Knowledge Panel) |
+| `seo nextjs <dir>` | [seo-nextjs](resources/skills/seo-nextjs.md) | Code-level Next.js App Router SEO & GEO audit (`'use client'`, metadata, `robots.ts`, `llms.txt` / `llms-full.txt`, `@graph`) |
+| `seo growth <url>` | [seo-growth-geo](resources/skills/seo-growth-geo.md) | Off-page GEO, zero-to-one backlinks, GSC 16-month regex mining, Reddit playbook, & GTM funnel spy |
 
 ---
 

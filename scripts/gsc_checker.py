@@ -54,12 +54,19 @@ def build_service(credentials_path: str):
 # Data retrieval
 # ---------------------------------------------------------------------------
 
+PRESET_REGEXES = {
+    "long-tail-questions": r"^(?:\S+\s+){7,}\S+$",
+    "how-what-why": r"(?i)\b(how|what|why)\b",
+}
+
+
 def get_performance_data(
     service,
     site_url: str,
     days: int = 28,
     query_filter: str = "",
     row_limit: int = 25,
+    query_regex: str = "",
 ) -> dict:
     """
     Pull search performance data: impressions, clicks, CTR, position.
@@ -76,14 +83,21 @@ def get_performance_data(
         "startRow": 0,
     }
 
+    filters = []
     if query_filter:
-        body["dimensionFilterGroups"] = [{
-            "filters": [{
-                "dimension": "query",
-                "operator": "contains",
-                "expression": query_filter,
-            }]
-        }]
+        filters.append({
+            "dimension": "query",
+            "operator": "contains",
+            "expression": query_filter,
+        })
+    if query_regex:
+        filters.append({
+            "dimension": "query",
+            "operator": "includingRegex",
+            "expression": query_regex,
+        })
+    if filters:
+        body["dimensionFilterGroups"] = [{"filters": filters}]
 
     try:
         resp = service.searchanalytics().query(siteUrl=site_url, body=body).execute()
@@ -190,9 +204,10 @@ def get_top_pages(service, site_url: str, days: int = 28, limit: int = 20) -> li
 def detect_opportunities(performance_data: list) -> list:
     """
     Identify SEO opportunities from GSC performance data.
-    - High impressions, low CTR → title/meta optimization needed
-    - Position 4-20 → "striking distance" keywords
-    - Position 1-3 with low CTR → Featured Snippet opportunity
+    - Position 8-15 -> page-one threshold (highest ROI quick push)
+    - Position 4-20 -> "striking distance" keywords
+    - High impressions, low CTR -> answer in first lines / title/meta optimization
+    - Position 1-3 with low CTR -> Featured Snippet opportunity
     """
     opportunities = []
 
@@ -200,12 +215,24 @@ def detect_opportunities(performance_data: list) -> list:
         pos = row.get("position", 0)
         ctr = row.get("ctr", 0)
         imps = row.get("impressions", 0)
+        query = row.get("query", "")
 
-        if 4 <= pos <= 20 and imps >= 50:
+        if 8 <= pos <= 15 and imps >= 30:
+            opportunities.append({
+                "type": "page_one_threshold",
+                "severity": "High",
+                "query": query,
+                "page": row["page"],
+                "position": pos,
+                "impressions": imps,
+                "finding": f"Position {pos} with {imps} impressions — stuck on positions 8-15 (one push from page one).",
+                "fix": "Answer the exact query in the first lines, add internal links from high-authority pages, and sharpen H1/title alignment.",
+            })
+        elif 4 <= pos <= 20 and imps >= 50:
             opportunities.append({
                 "type": "striking_distance",
                 "severity": "High",
-                "query": row["query"],
+                "query": query,
                 "page": row["page"],
                 "position": pos,
                 "impressions": imps,
@@ -216,7 +243,7 @@ def detect_opportunities(performance_data: list) -> list:
             opportunities.append({
                 "type": "low_ctr_top_position",
                 "severity": "Medium",
-                "query": row["query"],
+                "query": query,
                 "page": row["page"],
                 "position": pos,
                 "ctr": ctr,
@@ -228,12 +255,12 @@ def detect_opportunities(performance_data: list) -> list:
             opportunities.append({
                 "type": "high_impressions_low_ctr",
                 "severity": "Medium",
-                "query": row["query"],
+                "query": query,
                 "page": row["page"],
                 "ctr": ctr,
                 "impressions": imps,
-                "finding": f"{imps} impressions but {ctr}% CTR — title/meta not compelling.",
-                "fix": "Rewrite title tag with keyword + benefit. Add numbers, power words, or year to title.",
+                "finding": f"{imps} impressions but {ctr}% CTR — page ranks for a question it does not clearly answer.",
+                "fix": "Answer the question directly in the first lines of the ranking page and rewrite the title/meta for clarity.",
             })
 
     return opportunities
@@ -249,8 +276,12 @@ def main():
     )
     parser.add_argument("site_url", help="GSC property URL (e.g., https://example.com)")
     parser.add_argument("--credentials", default="", help="Path to service account JSON credentials file. Falls back to GSC_CREDENTIALS_PATH env var or .env file.")
-    parser.add_argument("--days", type=int, default=28, help="Performance data lookback period (default: 28)")
-    parser.add_argument("--query", default="", help="Filter by query keyword")
+    parser.add_argument("--days", type=int, default=28, help="Performance data lookback period in days (default: 28, max ~480 for 16 months)")
+    parser.add_argument("--months", type=int, default=0, help="Convenience lookback in months (e.g. --months 16 sets days=480)")
+    parser.add_argument("--query", default="", help="Filter by query keyword (contains)")
+    parser.add_argument("--regex", default="", help="Filter by RE2 regex on query (includingRegex)")
+    parser.add_argument("--preset", choices=sorted(PRESET_REGEXES.keys()), default="", help="Built-in query mining preset (e.g. long-tail-questions, how-what-why)")
+    parser.add_argument("--row-limit", type=int, default=50, help="Max query/page rows to pull (default: 50)")
     parser.add_argument("--inspect", default="", help="URL to inspect for indexing status")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
     args = parser.parse_args()
@@ -261,13 +292,24 @@ def main():
         parser.error("GSC credentials required. Pass --credentials <path> or set GSC_CREDENTIALS_PATH in your environment / .env file.")
     service = build_service(credentials_path)
 
+    lookback_days = min(args.months * 30, 480) if args.months > 0 else args.days
+    query_regex = args.regex or PRESET_REGEXES.get(args.preset, "")
+
     report = {
         "site_url": args.site_url,
-        "days": args.days,
+        "days": lookback_days,
+        "query_regex": query_regex or None,
     }
 
     # Performance data
-    perf = get_performance_data(service, args.site_url, days=args.days, query_filter=args.query)
+    perf = get_performance_data(
+        service,
+        args.site_url,
+        days=lookback_days,
+        query_filter=args.query,
+        row_limit=args.row_limit,
+        query_regex=query_regex,
+    )
     report["performance"] = perf
 
     # Opportunities
@@ -275,7 +317,7 @@ def main():
         report["opportunities"] = detect_opportunities(perf["data"])
 
     # Top pages
-    report["top_pages"] = get_top_pages(service, args.site_url, days=args.days)
+    report["top_pages"] = get_top_pages(service, args.site_url, days=lookback_days)
 
     # Sitemaps
     report["sitemaps"] = get_sitemaps(service, args.site_url)
